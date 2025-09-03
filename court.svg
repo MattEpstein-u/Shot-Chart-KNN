@@ -1,0 +1,18 @@
+<svg width="500" height="470" xmlns="http://www.w3.org/2000/svg">
+  <!-- Court background -->
+  <rect width="500" height="470" fill="#f4a460" />
+
+  <!-- Three-point line -->
+  <path d="M25,470 A237.5,237.5 0 0,1 475,470" stroke="black" stroke-width="2" fill="none" />
+  <line x1="25" y1="470" x2="25" y2="330" stroke="black" stroke-width="2" />
+  <line x1="475" y1="470" x2="475" y2="330" stroke="black" stroke-width="2" />
+
+
+  <!-- Key -->
+  <rect x="160" y="470" width="180" height="190" stroke="black" stroke-width="2" fill="none" transform="translate(0, -190)" />
+  <circle cx="250" cy="280" r="60" stroke="black" stroke-width="2" fill="none" />
+
+  <!-- Backboard and Hoop -->
+  <line x1="220" y1="430" x2="280" y2="430" stroke="black" stroke-width="3" />
+  <circle cx="250" cy="415" r="15" stroke="black" stroke-width="2" fill="none" />
+</svg>
