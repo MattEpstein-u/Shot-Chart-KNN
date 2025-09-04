@@ -1,18 +1,29 @@
-<svg width="500" height="470" xmlns="http://www.w3.org/2000/svg">
-  <!-- Court background -->
-  <rect width="500" height="470" fill="#f4a460" />
+<svg width="500" height="470" viewBox="0 0 500 470" xmlns="http://www.w3.org/2000/svg">
+  <!-- Court Floor -->
+  <rect width="500" height="470" fill="#dfbb85"/>
 
-  <!-- Three-point line -->
-  <path d="M25,470 A237.5,237.5 0 0,1 475,470" stroke="black" stroke-width="2" fill="none" />
-  <line x1="25" y1="470" x2="25" y2="330" stroke="black" stroke-width="2" />
-  <line x1="475" y1="470" x2="475" y2="330" stroke="black" stroke-width="2" />
-
+  <!-- Out of Bounds -->
+  <rect width="500" height="470" stroke="black" stroke-width="2" fill="none"/>
 
   <!-- Key -->
-  <rect x="160" y="470" width="180" height="190" stroke="black" stroke-width="2" fill="none" transform="translate(0, -190)" />
-  <circle cx="250" cy="280" r="60" stroke="black" stroke-width="2" fill="none" />
+  <rect x="170" y="280" width="160" height="190" stroke="black" stroke-width="2" fill="#d2a76f"/>
+  
+  <!-- Free Throw Circle -->
+  <circle cx="250" cy="280" r="60" stroke="black" stroke-width="2" fill="none"/>
+  <!-- Dashed part of the circle inside the key -->
+  <path d="M 190 280 A 60 60 0 0 0 310 280" stroke="black" stroke-width="2" stroke-dasharray="5,5" fill="none"/>
 
-  <!-- Backboard and Hoop -->
-  <line x1="220" y1="430" x2="280" y2="430" stroke="black" stroke-width="3" />
-  <circle cx="250" cy="415" r="15" stroke="black" stroke-width="2" fill="none" />
+  <!-- Three-Point Line -->
+  <line x1="30" y1="470" x2="30" y2="328" stroke="black" stroke-width="2"/>
+  <line x1="470" y1="470" x2="470" y2="328" stroke="black" stroke-width="2"/>
+  <path d="M 30 328 A 237.5 237.5 0 0 1 470 328" stroke="black" stroke-width="2" fill="none"/>
+
+  <!-- Backboard -->
+  <line x1="220" y1="430" x2="280" y2="430" stroke="black" stroke-width="4"/>
+  
+  <!-- Hoop -->
+  <circle cx="250" cy="417.5" r="7.5" stroke="red" stroke-width="2" fill="none"/>
+
+  <!-- Restricted Area -->
+  <path d="M 210 417.5 A 40 40 0 0 1 290 417.5" stroke="black" stroke-width="2" fill="none"/>
 </svg>

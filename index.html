@@ -3,16 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seth Curry Shot Chart</title>
+    <title>Seth Curry Shot Chart KNN</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>Seth Curry Shot Chart</h1>
+    <div id="controls">
+        <label for="k-slider">K: <span id="k-value">7</span></label>
+        <input type="range" id="k-slider" min="3" max="13" value="7" step="2">
+    </div>
     <div id="court-container">
-        <div id="y-axis"></div>
         <img src="court.svg" alt="Basketball Court" id="court-img">
-        <div id="shot-chart"></div>
-        <div id="x-axis"></div>
+        <div id="shot-chart">
+        <svg id="knn-lines-svg" width="100%" height="100%"></svg>
+    </div>
+    </div>
+    <div id="probability-container">
+        <span id="probability-label">Make Probability</span>
+        <div id="probability-bar-background">
+            <div id="probability-bar-foreground"></div>
+        </div>
+        <span id="probability-text">0.00%</span>
     </div>
     <script src="script.js"></script>
 </body>

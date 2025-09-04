@@ -1,40 +1,38 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded and parsed');
+
     const shotChart = document.getElementById('shot-chart');
-    const xAxis = document.getElementById('x-axis');
-    const yAxis = document.getElementById('y-axis');
+    const kSlider = document.getElementById('k-slider');
+    const kValue = document.getElementById('k-value');
+    const courtImg = document.getElementById('court-img');
+    const knnLinesSvg = document.getElementById('knn-lines-svg');
+    let shots = [];
+    let newShotPoint = null;
 
-    // Create X-axis ticks
-    for (let i = -25; i <= 25; i += 5) {
-        const tick = document.createElement('div');
-        tick.classList.add('tick-label');
-        tick.textContent = i;
-        xAxis.appendChild(tick);
-    }
-
-    // Create Y-axis ticks
-    for (let i = 0; i <= 45; i += 5) {
-        const tick = document.createElement('div');
-        tick.classList.add('tick-label');
-        tick.textContent = i;
-        yAxis.appendChild(tick);
-    }
-
+    kSlider.addEventListener('input', () => {
+        kValue.textContent = kSlider.value;
+        // Recalculate if a point exists
+        if (newShotPoint) {
+            const x = parseFloat(newShotPoint.style.left);
+            const y = parseFloat(newShotPoint.style.top);
+            const courtX = (x / 10) - 25;
+            const courtY = (470 - y) / 10;
+            calculateProbability(courtX, courtY, x, y);
+        }
+    });
 
     fetch('sethcurry.csv')
         .then(response => response.text())
         .then(csvText => {
-            const shots = parseCSV(csvText);
+            console.log('CSV data fetched');
+            shots = parseCSV(csvText);
+            // ... (rest of the shot rendering logic)
             shots.forEach(shot => {
                 if (shot.X && shot.Y) {
                     const shotDiv = document.createElement('div');
                     shotDiv.classList.add('shot');
                     shotDiv.classList.add(shot.SCORE === 'MADE' ? 'made' : 'missed');
                     
-                    // The x and y in the csv are in feet.
-                    // The court image is 500px wide and 470px tall, representing a 50x47 feet area.
-                    // X coordinates are from -25 to 25 feet, so we add 25 to normalize to 0-50.
-                    // Y coordinates are distance from the baseline.
-                    // We multiply by 10 to scale from feet to pixels.
                     const xPos = (parseFloat(shot.X) + 25) * 10;
                     const yPos = 470 - (parseFloat(shot.Y) * 10);
 
@@ -44,8 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const tooltip = document.createElement('div');
                     tooltip.classList.add('tooltip');
                     tooltip.innerHTML = `
-                        <b>X:</b> ${shot.X}<br>
-                        <b>Y:</b> ${shot.Y}<br>
+                        <b>X:</b> ${shot.X.toPrecision(5)}<br>
+                        <b>Y:</b> ${shot.Y.toPrecision(5)}<br>
                         <b>Result:</b> ${shot.SCORE}
                     `;
 
@@ -64,10 +62,80 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
+    shotChart.addEventListener('click', (e) => {
+        // Prevent creating a new point when clicking on an existing shot
+        if (e.target.classList.contains('shot')) {
+            return;
+        }
+
+        console.log('Court area clicked');
+        if (newShotPoint && shotChart.contains(newShotPoint)) {
+            shotChart.removeChild(newShotPoint);
+        }
+
+        const rect = courtImg.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        console.log(`Clicked at pixel coordinates: (${x}, ${y})`);
+
+        newShotPoint = document.createElement('div');
+        newShotPoint.classList.add('new-shot-point');
+        newShotPoint.style.left = `${x}px`;
+        newShotPoint.style.top = `${y}px`;
+        shotChart.appendChild(newShotPoint);
+        console.log('New shot point added to the DOM');
+
+        const courtX = (x / 10) - 25;
+        const courtY = (470 - y) / 10;
+        console.log(`Calculated court coordinates: (${courtX}, ${courtY})`);
+
+        calculateProbability(courtX, courtY, x, y);
+    });
+
+    function calculateProbability(courtX, courtY, pixelX, pixelY) {
+        console.log('Calculating probability...');
+        const k = parseInt(kSlider.value);
+        
+        shots.forEach(shot => {
+            shot.distance = Math.sqrt(Math.pow(parseFloat(shot.X) - courtX, 2) + Math.pow(parseFloat(shot.Y) - courtY, 2));
+        });
+
+        shots.sort((a, b) => a.distance - b.distance);
+
+        const kNearest = shots.slice(0, k);
+        console.log('K-Nearest neighbors:', kNearest);
+
+        const madeShots = kNearest.filter(shot => shot.SCORE === 'MADE').length;
+        const probability = (madeShots / k) * 100;
+
+        const probabilityBar = document.getElementById('probability-bar-foreground');
+        const probabilityText = document.getElementById('probability-text');
+
+        probabilityBar.style.width = `${probability}%`;
+        probabilityText.textContent = `${probability.toFixed(2)}%`;
+
+        // Draw lines
+        knnLinesSvg.innerHTML = ''; // Clear old lines
+        kNearest.forEach(neighbor => {
+            const neighborX = (parseFloat(neighbor.X) + 25) * 10;
+            const neighborY = 470 - (parseFloat(neighbor.Y) * 10);
+
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', pixelX);
+            line.setAttribute('y1', pixelY);
+            line.setAttribute('x2', neighborX);
+            line.setAttribute('y2', neighborY);
+            line.setAttribute('stroke', 'black');
+            line.setAttribute('stroke-width', '1');
+            knnLinesSvg.appendChild(line);
+        });
+        console.log('Drew ' + k + ' lines to neighbors.');
+    }
+
     function parseCSV(csvText) {
         const lines = csvText.trim().split(/\r?\n/);
         const headers = lines[0].split(',').map(header => header.trim());
-        const shots = [];
+        const parsedShots = [];
         for (let i = 1; i < lines.length; i++) {
             const values = lines[i].split(',');
             if (values.length === headers.length) {
@@ -75,9 +143,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (let j = 0; j < headers.length; j++) {
                     shot[headers[j]] = values[j].trim();
                 }
-                shots.push(shot);
+                // Ensure coordinates are numbers
+                shot.X = parseFloat(shot.X);
+                shot.Y = parseFloat(shot.Y);
+                parsedShots.push(shot);
             }
         }
-        return shots;
+        return parsedShots;
     }
 });
